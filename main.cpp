@@ -3,13 +3,13 @@
 
 int main() {
 
-    BucketStorage<int> storage;
+    Container<int> storage{};
     //    storage.insert(1);
     //    storage.insert(2);
     for (int i = 0; i < 5; ++i) {
-        storage.insert(i);
+        storage.addElement(i);
     }
-    for (auto it = storage.begin(); it != storage.end(); ++it) {
+    for (auto it = storage.begin(); it != storage.end(); it++) {
         std::cout << *it << " ";
     }
 //    auto it = storage.begin();

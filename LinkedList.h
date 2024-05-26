@@ -28,7 +28,7 @@ private:
 public:
     LinkedList() : head(nullptr), tail(nullptr), size(0) {}
 
-    void insertAtBeginning(T value) {
+    void insert(T value) {
         auto* newNode = new Node<T>(value);
         if (head == nullptr) {
             head = newNode;
@@ -41,7 +41,7 @@ public:
         size++;
     }
 
-    void insertAtEnd(T value) {
+    void put(T value) {
         auto* newNode = new Node<T>(value);
         if (tail == nullptr) {
             head = newNode;
