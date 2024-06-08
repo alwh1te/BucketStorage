@@ -66,14 +66,22 @@ public:
 
         return current->data;
     }
+
+    T getLast() {
+        return head->data;
+    }
+
+    bool isEmpty() {
+        return size == 0;
+    }
+
     class Iterator {
     private:
         Node<T>* current;
-
     public:
-        explicit Iterator(LinkedList<T>* node) : current(node) {}
+        explicit Iterator(Node<T>* node) : current(node) {}
 
-        T& operator*() {
+        T operator*() const {
             return current->data;
         }
 
@@ -82,16 +90,26 @@ public:
             return *this;
         }
 
+        Iterator operator++(int) {
+            Iterator old = *this;
+            ++(*this);
+            return old;
+        }
+
+        bool operator==(const Iterator& other) const {
+            return current == other.current;
+        }
+
         bool operator!=(const Iterator& other) const {
-            return current != other.current;
+            return !(*this == other);
         }
     };
 
-    Iterator begin() {
+    Iterator begin() const {
         return Iterator(head);
     }
 
-    Iterator end() {
+    Iterator end() const {
         return Iterator(nullptr);
     }
 };

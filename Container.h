@@ -1,80 +1,58 @@
-//
-// Created by Alexander on 19.05.2024.
-//
 #pragma once
 
 #ifndef BUCKETSTORAGE_CONTAINER_H
 #define BUCKETSTORAGE_CONTAINER_H
-
-//#include <iterator>
-//#include <memory>
+#include <cstddef>
+#include <iterator>
+#include <stdexcept>
+#include <utility>
 #include "LinkedList.h"
 #include <iostream>
-#include <stdexcept>
-#include <vector>
-#include "Bucket.h"
+#include "Vector.h"
+
+//#include "Bucket.h"
+
 
 template<typename T>
 class Container {
 private:
-    const size_t bucketSize;
-    LinkedList<Bucket<T>> buckets;
+    Vector<Bucket<T>> blocks; // Вектор для хранения блоков
 
 public:
-    explicit Container(size_t size = 64) : bucketSize(size) {
-//        Bucket<T> newBucket(bucketSize);
-//        buckets.insert(newBucket);
+    // Метод для вставки элемента
+    void insert(const T& object) {
+        bool inserted = false;
+        for (size_t i = 0; i < blocks.size_(); ++i) {
+            if (!blocks[i].full()) {
+                blocks[i].insert(object);
+                inserted = true;
+                break;
+            }
+        }
+        if (!inserted) {
+            blocks.emplace_back(Bucket<T>(5));
+            blocks.back().insert(object);
+        }
     }
 
-    void addElement(const T &element) {
-//        for (auto &bucket: buckets) {
-        for (Iterator it = buckets.begin(); it != buckets.end(); it++) {
-            if (it.size() < bucketSize) {
-                it.add(element);
+    // Метод для удаления элемента
+    void remove(const T& object) {
+        for (auto& block : blocks) {
+            if (block.contains(object)) { // Если блок содержит нужный объект
+                block.remove(object); // Удаляем объект из блока
+                if (block.empty()) { // Если блок стал пустым после удаления
+                    blocks.erase(std::remove(blocks.begin(), blocks.end(), block), blocks.end()); // Удаляем блок из контейнера
+                }
                 return;
             }
         }
-
-        Bucket<T> newBucket(bucketSize);
-        newBucket.add(element);
-        buckets.put(newBucket);
-    }
-    class Iterator {
-    private:
-        const Container& container;
-        size_t bucketIndex;
-        typename Bucket<T>::Iterator bucketIterator;
-
-    public:
-        Iterator(const Container& cont, size_t index)
-            : container(cont), bucketIndex(index), bucketIterator(cont.buckets[index].begin()) {}
-
-        T& operator*() const {
-            return *bucketIterator;
-        }
-
-        Iterator& operator++() {
-            ++bucketIterator;
-            if (bucketIterator == container.buckets[bucketIndex].end()) {
-                bucketIndex++;
-                if (bucketIndex < container.buckets.size()) {
-                    bucketIterator = container.buckets[bucketIndex].begin();
-                }
-            }
-            return *this;
-        }
-
-        bool operator!=(const Iterator& other) const {
-            return (bucketIndex != other.bucketIndex) || (bucketIterator != other.bucketIterator);
-        }
-    };
-
-    Iterator begin() const {
-        return Iterator(*this, 0);
     }
 
-    Iterator end() const {
-        return Iterator(*this, buckets.size());
+    // Метод для вывода всех активных элементов в контейнере
+    void printActive() const {
+        for (const auto& block : blocks) {
+            block.printActive(); // Выводим активные элементы в каждом блоке
+        }
     }
 };
 #endif//BUCKETSTORAGE_CONTAINER_H

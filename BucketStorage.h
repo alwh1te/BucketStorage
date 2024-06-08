@@ -79,12 +79,12 @@
 //        return total_size == 0;
 //    }
 //
-//    size_t size() const {
+//    size_t size_() const {
 //        return total_size;
 //    }
 //
 //    size_t capacity() const {
-//        return buckets.size() * bucket_capacity;
+//        return buckets.size_() * bucket_capacity;
 //    }
 //
 //    void shrink_to_fit() {

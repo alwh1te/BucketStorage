@@ -7,4 +7,5 @@ add_executable(BucketStorage main.cpp
         Container.h
         BucketStorage.h
         LinkedList.h
-        Bucket.h)
+        Bucket.h
+        Vector.h)
