@@ -88,7 +88,7 @@ public:
     reference operator*() const;
     pointer operator->() const;
 
-//    operator const_iterator() const;
+    //    operator const_iterator() const;
 
     iterator &operator++();
     iterator operator++(int);
@@ -103,8 +103,8 @@ public:
     bool operator==(const iterator &other) const;
     bool operator!=(const iterator &other) const;
 
-    bool operator==(const const_iterator& other) const;
-    bool operator!=(const const_iterator& other) const;
+    bool operator==(const const_iterator &other) const;
+    bool operator!=(const const_iterator &other) const;
 
 private:
     BucketStorage *storage;
@@ -146,7 +146,7 @@ private:
     Block *block;
     size_type index;
 
-//    const_iterator(const BucketStorage *storage, Block *block, size_type index);
+    //    const_iterator(const BucketStorage *storage, Block *block, size_type index);
 
     friend class BucketStorage;
 };
@@ -316,12 +316,6 @@ typename BucketStorage<T>::iterator &BucketStorage<T>::iterator::operator++() {
     return *this;
 }
 
-template<typename T>
-typename BucketStorage<T>::iterator BucketStorage<T>::iterator::operator++(int) {
-    iterator temp = *this;
-    ++(*this);
-    return temp;
-}
 
 template<typename T>
 typename BucketStorage<T>::iterator &BucketStorage<T>::iterator::operator--() {
@@ -350,6 +344,13 @@ typename BucketStorage<T>::iterator &BucketStorage<T>::iterator::operator--() {
     block = nullptr;
     index = 0;
     return *this;
+}
+
+template<typename T>
+typename BucketStorage<T>::iterator BucketStorage<T>::iterator::operator++(int) {
+    iterator temp = *this;
+    ++(*this);
+    return temp;
 }
 
 template<typename T>
@@ -390,12 +391,12 @@ bool BucketStorage<T>::iterator::operator!=(const iterator &other) const {
 }
 
 template<typename T>
-bool BucketStorage<T>::iterator::operator==(const const_iterator& other) const {
+bool BucketStorage<T>::iterator::operator==(const const_iterator &other) const {
     return storage == other.storage && block == other.block && index == other.index;
 }
 
 template<typename T>
-bool BucketStorage<T>::iterator::operator!=(const const_iterator& other) const {
+bool BucketStorage<T>::iterator::operator!=(const const_iterator &other) const {
     return storage == other.storage && block == other.block && index != other.index;
 }
 
@@ -405,14 +406,20 @@ BucketStorage<T>::Block::Block(size_type block_capacity)
 
 template<typename T>
 BucketStorage<T>::Block::~Block() {
-    delete[] data;
+    //    delete[] data;
+    //    delete[] active;
+//    ::operator delete(data);
+    for (size_type i = 0; i < size; ++i) {
+//        deallocate_block(blocks[i]);
+        data[i].~T();
+    }
     delete[] active;
 }
 
 template<class T>
 BucketStorage<T>::BucketStorage(size_type block_capacity)
     : block_capacity(block_capacity), blocks(nullptr), block_count(0), total_size(0) {
-//    allocate_new_block();
+    //    allocate_new_block();
 }
 
 template<typename T>
@@ -433,9 +440,9 @@ BucketStorage<T>::BucketStorage(BucketStorage &&other) noexcept
 
 template<typename T>
 BucketStorage<T>::~BucketStorage() {
-//    for (size_type i = 0; i < block_count; ++i) {
-//        delete blocks[i];
-//    }
+    //    for (size_type i = 0; i < block_count; ++i) {
+    //        delete blocks[i];
+    //    }
     delete[] blocks;
 }
 
@@ -510,6 +517,12 @@ typename BucketStorage<T>::iterator BucketStorage<T>::erase(iterator it) {
         block->active[index] = false;
         --block->size;
         --total_size;
+        std::cout << "Size: " << block->size << std::endl;
+        std::cout << "Capacity: " << block_count << std::endl;
+        if (block->size == 0) {
+//            std::cout << block << std::endl;
+
+        }
         return ++it;
     }
     return end();
@@ -559,7 +572,7 @@ void BucketStorage<T>::clear() {
     blocks = nullptr;
     block_count = 0;
     total_size = 0;
-    allocate_new_block();
+//    allocate_new_block();
 }
 
 template<typename T>
