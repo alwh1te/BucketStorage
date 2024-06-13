@@ -517,12 +517,6 @@ typename BucketStorage<T>::iterator BucketStorage<T>::erase(iterator it) {
         block->active[index] = false;
         --block->size;
         --total_size;
-//        std::cout << "Size: " << block->size << std::endl;
-//        std::cout << "Capacity: " << block_count << std::endl;
-        if (block->size == 0) {
-            deallocate_block(block);
-            //            std::cout << block << std::endl;
-        }
         return ++it;
     }
     return end();
