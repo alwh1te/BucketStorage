@@ -408,9 +408,9 @@ template<typename T>
 BucketStorage<T>::Block::~Block() {
     //    delete[] data;
     //    delete[] active;
-//    ::operator delete(data);
+    //    ::operator delete(data);
     for (size_type i = 0; i < size; ++i) {
-//        deallocate_block(blocks[i]);
+        //        deallocate_block(blocks[i]);
         data[i].~T();
     }
     delete[] active;
@@ -517,11 +517,11 @@ typename BucketStorage<T>::iterator BucketStorage<T>::erase(iterator it) {
         block->active[index] = false;
         --block->size;
         --total_size;
-        std::cout << "Size: " << block->size << std::endl;
-        std::cout << "Capacity: " << block_count << std::endl;
+//        std::cout << "Size: " << block->size << std::endl;
+//        std::cout << "Capacity: " << block_count << std::endl;
         if (block->size == 0) {
-//            std::cout << block << std::endl;
-
+            deallocate_block(block);
+            //            std::cout << block << std::endl;
         }
         return ++it;
     }
@@ -565,14 +565,15 @@ void BucketStorage<T>::shrink_to_fit() {
 
 template<typename T>
 void BucketStorage<T>::clear() {
-    for (size_type i = 0; i < block_count; ++i) {
-        deallocate_block(blocks[i]);
+    if (blocks) {
+        for (size_type i = 0; i < block_count; ++i) {
+            deallocate_block(blocks[i]);
+        }
+        delete[] blocks;
+        blocks = nullptr;
     }
-    delete[] blocks;
-    blocks = nullptr;
     block_count = 0;
     total_size = 0;
-//    allocate_new_block();
 }
 
 template<typename T>
@@ -655,5 +656,7 @@ void BucketStorage<T>::allocate_new_block() {
 
 template<typename T>
 void BucketStorage<T>::deallocate_block(Block *block) {
-    delete block;
+    if (block) {
+        block->~Block();
+    }
 }
