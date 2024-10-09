@@ -13,7 +13,7 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(BucketStorage main.cpp
+add_executable(BucketStorage
         bucket_storage.hpp
         tests.cpp)
 
