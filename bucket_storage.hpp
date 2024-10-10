@@ -19,7 +19,6 @@ public:
     using pointer = value_type *;
 
     class iterator;
-
     class const_iterator;
 
     explicit BucketStorage(size_type m_block_capacity = 64);
@@ -40,11 +39,11 @@ public:
 
     iterator erase(iterator it);
 
-    bool empty() const noexcept;
+    [[nodiscard]] bool empty() const noexcept;
 
-    size_type size() const noexcept;
+    [[nodiscard]] size_type size() const noexcept;
 
-    size_type capacity() const noexcept;
+    [[nodiscard]] size_type capacity() const noexcept;
 
     void shrink_to_fit();
 
@@ -96,7 +95,7 @@ private:
 
         size_type pop();
 
-        size_type size() const noexcept { return m_size; }
+        [[nodiscard]] size_type size() const noexcept { return m_size; }
 
         friend class BucketStorage;
     };
@@ -149,7 +148,8 @@ public:
 
     iterator() noexcept : m_storage(nullptr), m_index_block(0), m_index_el(0){};
 
-    iterator(BucketStorage *m_storage, size_type block_ind, size_type index) noexcept : m_storage(m_storage), m_index_block(block_ind), m_index_el(index) {
+    iterator(BucketStorage *m_storage, size_type block_ind, size_type index) noexcept
+        : m_storage(m_storage), m_index_block(block_ind), m_index_el(index) {
     }
 
     reference operator*() const;
@@ -198,8 +198,8 @@ public:
 
     const_iterator() noexcept : m_storage(nullptr), m_index_block(0), m_index_el(0) {}
 
-    const_iterator(const BucketStorage *storage, size_type block_idx, size_type index) noexcept : m_storage(storage), m_index_block(block_idx), m_index_el(index) {
-    }
+    const_iterator(const BucketStorage *storage, size_type block_idx, size_type index) noexcept
+        : m_storage(storage), m_index_block(block_idx), m_index_el(index) {}
 
     const_iterator(const iterator &it);
 
@@ -232,7 +232,8 @@ private:
 // ------------------------------------
 
 template<typename T>
-BucketStorage<T>::Block::Block(BucketStorage::size_type capacity) : m_capacity(capacity), m_size(0), m_index(0) {
+BucketStorage<T>::Block::Block(BucketStorage::size_type capacity)
+    : m_capacity(capacity), m_size(0), m_index(0) {
     try {
         m_data = static_cast<pointer>(operator new(capacity * sizeof(value_type)));
         m_active = new bool[capacity]{false};
@@ -307,7 +308,8 @@ void BucketStorage<T>::Block::remove(BucketStorage::iterator it) {
 }
 
 template<typename T>
-BucketStorage<T>::List::List(const BucketStorage<T>::List &other) noexcept : m_head(nullptr), m_size(other.m_size) {
+BucketStorage<T>::List::List(const BucketStorage<T>::List &other) noexcept
+    : m_head(nullptr), m_size(other.m_size) {
     if (other.m_head == nullptr) {
         return;
     }
@@ -320,7 +322,8 @@ BucketStorage<T>::List::List(const BucketStorage<T>::List &other) noexcept : m_h
 }
 
 template<typename T>
-BucketStorage<T>::List::List(BucketStorage<T>::List &&other) noexcept : m_head(other.m_head), m_size(other.m_size) {
+BucketStorage<T>::List::List(BucketStorage<T>::List &&other) noexcept
+    : m_head(other.m_head), m_size(other.m_size) {
     other.m_head = nullptr;
     other.m_size = 0;
 }
@@ -339,7 +342,7 @@ BucketStorage<T>::List::~List() {
 
 template<typename T>
 void BucketStorage<T>::List::append(size_type value) {
-    Node *newNode = nullptr;
+    Node *newNode;
     try {
         newNode = new Node(value);
         if (m_head == nullptr) {
@@ -373,7 +376,8 @@ typename BucketStorage<T>::size_type BucketStorage<T>::List::pop() {
 }
 
 template<typename T>
-BucketStorage<T>::BucketStorage(BucketStorage::size_type m_block_capacity) : m_block_capacity(m_block_capacity), m_size(0), m_block_index(0), m_block_count(0), m_blocks(nullptr) {
+BucketStorage<T>::BucketStorage(BucketStorage::size_type m_block_capacity)
+    : m_block_capacity(m_block_capacity), m_size(0), m_block_index(0), m_block_count(0), m_blocks(nullptr) {
     if (m_block_capacity < 1) {
         throw std::invalid_argument("Block capacity must be greater than 0");
     }
@@ -386,7 +390,8 @@ BucketStorage<T>::BucketStorage(BucketStorage::size_type m_block_capacity) : m_b
 }
 
 template<typename T>
-BucketStorage<T>::BucketStorage(const BucketStorage &other) : m_block_capacity(other.m_block_capacity), m_size(0), m_block_index(0), m_block_count(0), m_blocks(nullptr) {
+BucketStorage<T>::BucketStorage(const BucketStorage &other)
+    : m_block_capacity(other.m_block_capacity), m_size(0), m_block_index(0), m_block_count(0), m_blocks(nullptr) {
     m_freeBlock = new List(*other.m_freeBlock);
     for (const auto &value: other) {
         insert(value);
@@ -394,8 +399,9 @@ BucketStorage<T>::BucketStorage(const BucketStorage &other) : m_block_capacity(o
 }
 
 template<typename T>
-BucketStorage<T>::BucketStorage(BucketStorage &&other) noexcept : m_block_capacity(other.m_block_capacity), m_blocks(other.m_blocks), m_size(other.m_size),
-                                                                  m_block_index(other.m_block_index), m_block_count(other.m_block_count), m_freeBlock(other.m_freeBlock) {
+BucketStorage<T>::BucketStorage(BucketStorage &&other) noexcept
+    : m_block_capacity(other.m_block_capacity), m_blocks(other.m_blocks), m_size(other.m_size),
+      m_block_index(other.m_block_index), m_block_count(other.m_block_count), m_freeBlock(other.m_freeBlock) {
     other.m_blocks = nullptr;
     other.m_freeBlock = nullptr;
     other.m_size = 0;
@@ -449,21 +455,19 @@ void BucketStorage<T>::allocate_new_block() {
 template<typename T>
 template<typename U>
 typename BucketStorage<T>::iterator BucketStorage<T>::insert_impl(U &&value) {
-    if (m_size < m_block_capacity * m_block_count) {
-        size_type block_index;
-        if (m_freeBlock != nullptr && m_freeBlock->m_size > 0) {
-            block_index = m_freeBlock->pop();
-        } else {
-            block_index = m_block_index;
-        }
-        size_type block_elem = m_blocks[block_index].append(std::forward<U>(value));
-        m_size++;
-        return iterator(this, block_index, block_elem);
-    } else {
+    if (m_size >= m_block_capacity * m_block_count) {
         allocate_new_block();
         m_block_index = m_block_count - 1;
-        return insert_impl(std::forward<U>(value));
     }
+    size_type block_index;
+    if (m_freeBlock != nullptr && m_freeBlock->m_size > 0) {
+        block_index = m_freeBlock->pop();
+    } else {
+        block_index = m_block_index;
+    }
+    size_type block_elem = m_blocks[block_index].append(std::forward<U>(value));
+    m_size++;
+    return iterator(this, block_index, block_elem);
 }
 
 template<typename T>
@@ -675,8 +679,8 @@ typename BucketStorage<T>::const_iterator BucketStorage<T>::cend() const noexcep
 // ------------------------------------
 
 template<typename T>
-BucketStorage<T>::const_iterator::const_iterator(const BucketStorage<T>::iterator &it) : m_storage(it.m_storage), m_index_block(it.m_index_block), m_index_el(it.m_index_el) {
-}
+BucketStorage<T>::const_iterator::const_iterator(const BucketStorage<T>::iterator &it)
+    : m_storage(it.m_storage), m_index_block(it.m_index_block), m_index_el(it.m_index_el) {}
 
 template<typename T>
 typename BucketStorage<T>::const_iterator::reference BucketStorage<T>::const_iterator::operator*() const {
@@ -773,7 +777,7 @@ bool BucketStorage<T>::const_iterator::operator!=(const BucketStorage<T>::const_
 }
 
 template<typename T>
-typename BucketStorage<T>::iterator BucketStorage<T>::erase(BucketStorage<T>::iterator it) {
+typename BucketStorage<T>::iterator BucketStorage<T>::erase(BucketStorage::iterator it) {
     if (it.m_storage != this || it.m_index_block >= m_block_count || it.m_index_el >= m_block_capacity) {
         throw std::out_of_range("Invalid iterator");
     }
